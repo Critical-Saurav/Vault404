@@ -1,0 +1,481 @@
+Select *
+from parks_and_recreation.employee_demographics;
+
+select first_name
+from parks_and_recreation.employee_demographics;
+
+-- where clause -
+select *
+from parks_and_recreation.employee_demographics
+where gender !='male'and birth_date >= '1978-01-01';
+
+-- logical operators - and, or, or not, 
+select *
+from parks_and_recreation.employee_demographics
+where (gender='male' and first_name='mark')	 or age > 55;
+
+-- in 
+select * from parks_and_recreation.employee_salary where dept_id in (1,4);
+
+-- between
+select * from parks_and_recreation.employee_salary where salary between 60000 and 70000;
+
+
+-- like statement - % for multiple and _ for single
+select *
+from parks_and_recreation.employee_demographics
+where birth_date like '%1989%';
+
+-- group by and gender by
+select *
+from parks_and_recreation.employee_demographics
+where gender != 'Female';
+
+-- Group by
+select gender, avg(age)
+from parks_and_recreation.employee_demographics
+group by gender;
+
+select *
+from parks_and_recreation.employee_salary
+;
+
+select gender, avg(age), max(age), min(age), count(age) 
+from parks_and_recreation.employee_demographics
+group by (gender);
+
+-- order by ASC(default) or DESC
+select *
+from parks_and_recreation.employee_demographics
+order by gender, first_name 
+;
+
+-- Having (similar to where, but can also be used after grouping of rows)
+select dept_id, avg(salary)
+from parks_and_recreation.employee_salary
+group by dept_id
+having avg(salary) >60000
+;
+
+-- limit (select number of rows)
+select *
+from parks_and_recreation.employee_demographics
+where gender = 'male'
+order by age desc
+limit 5, 2;
+
+-- aliasing (giving names to columns) used AS <- optional
+select dept_id, avg (salary) as Avg_age
+from parks_and_recreation.employee_salary
+group by(dept_id)
+having avg(salary)>60000;
+
+-- joins (joins 2 tables)
+
+-- inner join
+select *
+from parks_and_recreation.employee_demographics;
+
+select *
+from parks_and_recreation.employee_salary;
+
+select *
+from parks_and_recreation.employee_demographics as dem 
+inner join parks_and_recreation.employee_salary as sal
+on sal.employee_id= dem.employee_id 
+;
+
+-- Outer joins (left joing and right join)
+-- left joing | left dominating (no entry in right, null)
+select *
+from parks_and_recreation.employee_demographics as dem
+left join parks_and_recreation.employee_salary as sal
+on dem.employee_id=sal.employee_id;
+
+-- right join | right dominating (no entry on left, null)
+select *
+from parks_and_recreation.employee_demographics as dem
+right join parks_and_recreation.employee_salary as sal
+on dem.employee_id = sal.employee_id;
+
+-- self join (joing same table with a condion)
+select emp1.employee_id as Santa, emp1.first_name as first_name_santa, emp1.last_name as last_name_santa,
+emp2.first_name as first_name_emp, emp2.last_name as last_name_emp
+from parks_and_recreation.employee_salary as emp1
+join parks_and_recreation.employee_salary as emp2
+on emp1.employee_id+1 = emp2.employee_id;
+
+-- joining multiple tables
+select *
+from parks_and_recreation.employee_salary;
+
+select dem.employee_id, sal.last_name, sal.salary, dep.department_name
+from parks_and_recreation.employee_demographics as dem
+inner join parks_and_recreation.employee_salary as sal
+on sal.employee_id = dem.employee_id
+inner join parks_and_recreation.parks_departments as dep
+on dep.department_id = sal.dept_id;
+
+-- Unions (combine rows) default: distinct, to include repetetive data use Union All
+
+
+select sal.first_name, sal.last_name, sal.salary as 'age/salary', 'Earning more' as Verdict
+from parks_and_recreation.employee_salary as sal
+where sal.salary > 55000
+union
+select dem.first_name, dem.last_name, dem.age, 'Old Man' as Verdict
+from parks_and_recreation.employee_demographics as dem
+where dem.age > 45 and dem.gender = 'male'
+union
+select dem.first_name, dem.last_name, dem.age, 'Old lady'
+from parks_and_recreation.employee_demographics as dem
+where dem.age >40 and dem.gender = 'female'
+order by first_name;
+
+-- repeat, day
+select repeat('@', 10) as name;
+select day ('2025-05-05') as name;
+
+
+-- string function : helps to manupulate, correct and clean strings
+select length('Saurav');
+select upper('saurav');
+select lower('SAURAV');
+select trim('        saurav         ') as name;
+select rtrim('        saurav         ') as name;
+select ltrim('        saurav         ') as name;
+
+-- substring : extract data from given location substring(column, initial point, final point)
+
+select dem.first_name, dem.last_name,
+substring(dem.birth_date, 6, 5) as DOB
+from parks_and_recreation.employee_demographics as dem
+;
+
+-- Replace : helps to replace 
+select dem.first_name, replace(dem.first_name, 'a', 'z') as LOL
+from parks_and_recreation.employee_demographics as dem;
+
+-- Locate and position: gives position of the thing we are searching locate (thing we are searching, column we are searching in)
+select locate('av','saurav');
+select position('av' in 'saurav');
+
+-- Ascii: gives ascii value
+select ascii(4);
+
+
+-- reverse, replace
+select reverse('Saurav');
+select replace('orage is a vegetable', 'vegetable', 'fruit') as orange;
+
+-- Concat : combines columns
+select dem.first_name, dem.last_name, concat(dem.first_name,' ', dem.last_name) as Full_Name
+from parks_and_recreation.employee_demographics as dem;
+
+
+-- Case statements
+-- When Then
+
+select dem.first_name, dem. last_name, dem.age,
+case
+	when age <= 30 then 'Young'
+	When age between 30 and 50 then 'Mid'
+    when age >50 then 'Old'
+end Age_Bracket
+from parks_and_recreation.employee_demographics as dem;
+
+-- ex: bonus: less than 50000 is 7% and more than 50000 is 5% 
+-- and finance department gets 10%
+
+select * from parks_and_recreation.parks_departments;
+
+select sal.first_name, sal.last_name, sal.salary, dept.department_name,
+case
+	when sal.salary <=50000 then (salary + salary*7/100)
+    when sal.salary >50000 then (salary + salary*5/100)
+    end as New_Salary,
+case
+when dept.department_name = 'Finance' then (salary*0.1)
+end as Bonus
+from parks_and_recreation.employee_salary as sal
+join parks_and_recreation.parks_departments as dept
+on sal.dept_id = dept.department_id;
+
+-- subsqueries :  queries withing queries
+select * 
+from parks_and_recreation.employee_demographics as dem
+where dem.employee_id in (select sal.employee_id 
+						from parks_and_recreation.employee_salary sal
+                        where sal.dept_id=1);
+
+select gender, avg(max_age)
+ from (select gender, avg(age) as avg_age,max(age) as max_age, min(age) as min_age, count(age) as cnt_age
+from parks_and_recreation.employee_demographics
+group by gender) as agg_table
+group by gender;
+
+
+-- window function/Over : similar to groupby. helps to create another column with aggregate funtion without losing rows 
+select dem.first_name,dem.gender, avg(sal.salary) over (partition by dem.gender) as avg_sal
+from parks_and_recreation.employee_demographics as dem
+join parks_and_recreation.employee_salary as sal
+on dem.employee_id= sal.employee_id;
+
+select dem.first_name, dem.last_name, dem.gender, sal.salary, sum(sal.salary) over(partition by dem.gender) as gen_sum
+from parks_and_recreation.employee_demographics as dem
+join parks_and_recreation.employee_salary as sal
+on sal.employee_id = dem.employee_id;
+
+-- rolling total : type of window function,  adds on valued based on partition
+select sal.first_name, sal.salary, sum(sal.salary) over(order by sal.first_name) as rolling_total
+from parks_and_recreation.employee_salary as sal;
+
+-- widnow function:  rolling total on gender
+select dem.employee_id, dem.first_name, dem.gender, sal.salary, sum(sal.salary) over (partition by dem.gender order by dem.employee_id) as rolling_total
+from parks_and_recreation.employee_demographics as dem
+join parks_and_recreation.employee_salary as sal
+on sal.employee_id = dem.employee_id;
+
+--  number() :  Assigns row number to rows as per requirements and over funtion 
+-- rank (can have gaps) and dense rank (can't have gaps)
+select dem.employee_id, dem.first_name, dem.last_name, dem.gender, sal.salary, row_number() over (partition by dem.gender order by sal.salary desc) as row_num,
+rank() over (partition by dem.gender order by sal.salary desc) as rank_num,
+dense_rank () over (partition by dem.gender order by sal.salary desc) as den_rank
+from parks_and_recreation.employee_demographics as dem
+join parks_and_recreation.employee_salary as sal
+on sal.employee_id= dem.employee_id;
+
+
+-- CTEs (common table exprtession) : creating a kind of temporary table inside "an SQL expression/Code"
+-- starts with "with"
+with avg_tab as
+(select sal.dept_id, avg(sal.salary) as avg_sal
+from parks_and_recreation.employee_salary as sal
+group by sal.dept_id)
+select avg(avg_sal)
+from avg_tab;
+
+# 'CTE' are similar to 'subqueries' but can reuse it in the same code again and again
+
+# we can create multiple 'CTE' and also use 'join' function . Ex:
+With dem_example as 
+(select dem.first_name, dem.last_name, dem.gender, dem.employee_id
+from parks_and_recreation.employee_demographics as dem
+),
+sal_example as
+(select sal.occupation, sal.salary, sal.employee_id
+from parks_and_recreation.employee_salary as sal)
+select * from dem_example
+join sal_example 
+on dem_example.employee_id = sal_example.employee_id;
+
+-- Temporary table: Creates temporary table for a single session
+create temporary table temp_table
+(first_name varchar(50), last_name varchar(50), favorite_movie varchar(100));
+
+insert into temp_table
+values('Alex', 'Freberg','Harry potter');
+select * from temp_table;
+
+-- Duplicate/fetch values from existing tables in the temp table
+create temporary table sal1_over_50k 
+select * from employee_salary
+where salary >= 50000;
+
+select * from sal1_over_50k;
+
+-- Stored procedure: store codes and reuse later 
+-- syntax create procedure procedure_name(specify data [optional])
+# can also use "drop procedure if exists -procedure name-"; to replace existing procedure with same name
+
+drop procedure if exists high_Sal;
+create procedure high_Sal()
+select * from parks_and_recreation.employee_salary as sal
+where sal.salary >=50000;
+call high_sal()
+
+-- Advanced stored procedure: Use delimeter and begin-end to store big and multiple codes
+delimiter #
+drop procedure if exists highsal1#
+create procedure highsal1(depid  int)
+begin
+	select * from employee_salary
+    where salary >=50000 and dept_id = depid;
+end #
+delimiter ;
+
+call highsal1(1)
+
+-- Trigger: happens when an eventakes place
+delimiter $$
+drop trigger if exists employee_insert$$
+create trigger employee_insert
+	after insert on employee_salary
+    for each row
+begin
+insert into employee_demographics (employee_id, first_name, last_name)
+value (new.employee_id, new.first_name, new.last_name);
+end $$
+delimiter ;
+
+insert into employee_salary (employee_id,first_name,last_name,occupation,salary, dept_id)
+values(13, 'Jean_Ralphio','Saperstein', 'Entertainment 720', 1000000, null);
+
+-- Event : Automatic schedule tasks that get executed in particular intervals
+delimiter #
+create event delete_old
+on schedule every 30 second
+do
+begin	
+    delete 
+    from employee_demographics
+    where age >= 60;
+end #
+delimiter ;
+
+select * from parks_and_recreation.employee_demographics;
+
+
+# simplilearn
+-- shows the databases
+show databases;
+
+-- use a particular database
+use parks_and_recreation;
+
+-- Shows the list of tables in the selected database
+show tables ;
+
+-- describe: shows the data types in table
+describe parks_and_recreation.employee_salary;
+
+# data definition : Creating a table
+
+-- Create database
+create database sql_intro;
+use sql_intro;
+
+-- crete table:
+drop table if exists emp_details ;
+create table emp_details 
+(Name varchar(25), Age int, sex char(1), DOJ date, City varchar(15), Salary float);
+
+use sql_intro;
+-- insert values:
+insert into emp_details 
+values ('Ammy', 35, 'F', '2014-12-20', 'Seattle', 80000),
+('Marry', 32, 'F', '2017-10-27', 'New York', 72000);
+
+-- Count: counts number of rows
+select count(*) as count from emp_details ;
+
+-- Round: round up the value into definite decimal places. round(column, number) 
+-- number is the decimal places: 0,1,2 etc. Ex:
+select dept_id, round(avg(salary),0) Avg_Sal from parks_and_recreation.employee_salary
+group by dept_id;
+
+-- subqueries: select statement inside a query 
+-- Select: ex: maximum salary person
+select concat(first_name,' ', last_name) from employee_salary where salary= (select max(salary) from employee_salary);
+
+-- Update table (DML): make changes in the table as per the requirements 
+drop table if exists sal_temp;
+
+create temporary table sal_temp
+select * from parks_and_recreation.employee_salary;
+select * from sal_temp;
+
+update sal_temp
+set salary = salary + 1
+where dept_id=1;
+
+select * from sal_temp;
+
+-- delete subquery
+delete from sal_temp
+where sal_temp.salary > 60000;
+select * from sal_temp;
+
+
+-- Triggers
+# create temporary tables to run triggers from 'parks_and_recreation'
+
+create database Triggers_1;
+use Triggers_1;
+
+create table temp_sal
+select * from parks_and_recreation.employee_salary;
+select * from temp_demo;
+
+create table temp_demo
+select * from parks_and_recreation.employee_demographics;
+
+create table temp_dept
+select * from parks_and_recreation.parks_departments;
+
+-- trigger : Before and after
+# types: Before insert and after insert , Before update and after update , Before delete and after delete
+# before
+drop trigger if exists age_verify;
+
+delimiter //
+create trigger age_verify
+before insert on temp_demo
+for each row
+if new.age<18 then set new.age = 18;
+end if//
+delimiter ;
+
+select * from temp_demo;
+
+insert into temp_demo
+values(14, 'Jane', 'Doe', 15, 'Female', null);
+
+# after trigger
+-- insert the values in a new table demo_lyt as soon as temp_demo is filled
+-- "for each row" is a very important part
+create table demo_lyt 
+select * from temp_demo where 1=0;
+
+-- creating after trigger:
+drop trigger if exists demo_lyt;
+delimiter //
+create trigger demo_lyt
+after insert on temp_demo
+for each row
+begin
+insert into demo_lyt (employee_id,first_name,last_name, age, birth_date)
+values (new.employee_id, new.first_name, new.last_name, new.age, new.birth_date);
+end //
+delimiter ;
+
+-- Stored procedure:
+# in procedure (it allows you to enter a values in the stored procedure, after the procedure even if the value is changed it would not affect the original values
+# out: Used to return a value from the procedure. The procedure sets it, and the caller receives the result
+# inout: Passes a value in, allows the procedure to modify it, and returns the updated value to the caller.
+
+drop procedure if exists desc_sal ;
+create procedure desc_sal (in var int)
+select * from employee_salary order by salary desc limit var;
+
+call desc_sal (4);
+
+select * from employee_demographics;
+select * from employee_salary;
+-- Create view:
+-- a view is like a virtual table—it doesn’t store data itself but shows results from a query. 
+create view emp_det as
+select dem.first_name, dem.last_name, dem.age, sal.salary 
+from employee_demographics as dem
+inner join parks_and_recreation.employee_salary as sal
+on sal.employee_id = dem.employee_id;
+
+select * from emp_det ;
+
+-- Use a CTE when you need a quick, readable way to organize a query or perform recursion.
+-- Use a temporary table when you need to store and manipulate intermediate results across multiple steps.
+-- Use a view when you want to abstract complex logic or restrict access to sensitive data.
+
+-- first values: first value of any table
+select first_value (salary) over (partition by dept_id order by salary desc)
+from employee_salary;
